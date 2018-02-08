@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+data/
+hw2_w17_eda1_r_census.Rmd
