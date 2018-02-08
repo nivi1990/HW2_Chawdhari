@@ -1,6 +1,6 @@
 ---
 title: "HW2-EDA with R - Part1: Plotting"
-author: "misken"
+author: "Nivedita Chawdhari"
 date: "January 22, 2018"
 output: html_document
 ---
@@ -77,7 +77,7 @@ add more code chunks as needed.
 Let's load a few libraries we'll need:
 
 ```{r}
-library(dplyr)
+library(dplyr) 
 library(ggplot2)
 ```
 
@@ -88,8 +88,8 @@ You should read the **county.csv** file into a data frame named county_df and
 **county_MI.csv** into a data frame named county_MI.
 
 ```{r read_countydata}
-# county_df <- ???
-# county_MI <- ???
+ county_df <- read.csv("data/county.csv")
+county_MI <- read.csv("data/county_MI.csv")
 ```
 
 Check the structure of each data.frame and use the `summary` function to begin
@@ -97,7 +97,10 @@ exploring the data. Are there any NA values? What
 differences do you notice between the structure of the two data frames.
 
 ```{r}
+str(county_df)
+str(county_MI)
 
+summary(county_df)
 ```
 
 The county_MI data frame contains data for Michigan only and includes an
@@ -115,7 +118,17 @@ income for the entire US.
 Write a short paragraph describing the distribution of median incomes.
 
 ```{r}
-# ggplot(???) + geom_histogram(???)
+ggplot(data=county_df, aes(county_df$Income)) + geom_histogram()
+
+ggplot(data = county_df) + geom_histogram(mapping = aes(x = county_df$Income) ,binwidth = 1000)
+ggplot(data = county_df) + geom_boxplot(mapping = aes(x = "Mean Income", y = county_df$Income ))
+
+
+ggplot(data = county_df) +   geom_density(mapping = aes(x = county_df$Income))
+
+ggplot(data=county_df, aes(y = county_df$Income,x = "count")) + geom_violin()
+
+
 ```
 
 ### Problem 3 - Histogram of total population
@@ -123,6 +136,7 @@ Write a short paragraph describing the distribution of median incomes.
 Create a histogram of total population for counties in the US.
 
 ```{r histo_totpop}
+ggplot(data=county_df, aes(county_df$TotalPop)) + geom_histogram()
 
 ```
 
@@ -134,6 +148,7 @@ Repeat the histogram about but make the following style changes to the plot.
 * Change the colors of the bars to something other than the default black
 
 ```{r histo_stylechanges}
+ggplot(data=county_df, aes(county_df$TotalPop)) + geom_histogram(colour ="Red", fill ="light blue") + labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties")
 
 ```
 
@@ -143,6 +158,9 @@ Income.
 Repeat the histogram but only for counties with less than 2.5 million people.
 
 ```{r histo_lt2.5m}
+
+ggplot(county_df[county_df$TotalPop < 2500000,],aes(x=TotalPop)) + geom_histogram(colour="red", fill ="Light Blue")+ labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties")
+ 
 
 ```
 
@@ -154,9 +172,16 @@ your graph has a title and good axis labels.
 
 Do the peninsulas 
 differ with respect to distribution of median income over the counties?
+Yes ,the peninsulas do differe with respect to the median income.
+1.The range of income for lower peninsula is greater than that for upper peninsula
+2.Overal Income for Lower Peninsula is higher than that for Upper Peninsula
+3.There are a few extreme income values for lower peninusla while for Upper Peninsula there are no outliers.
 
 
 ```{r bp_inc_by_peninsula}
+ggplot(data =  county_MI, aes(x = county_MI$peninsula,y = county_MI$Income)) +
+  geom_boxplot(colour="black",fill="light blue",outlier.colour = "red")+
+  labs(title = "Michigan Income by Peninsula",x="Peninsula" , y="Income in Million" )
 
 ```
 
@@ -164,8 +189,30 @@ Create several more boxplots showing how the peninsulas compare with respect to
 some of the other variables. Summarize your findings in a few short paragraphs.
 
 ```{r more_boxplots}
+ggplot(data =  county_MI, aes(x = county_MI$peninsula,y = log(county_MI$TotalPop))) +
+  geom_boxplot(colour="black",fill="light blue",outlier.colour = "red")+
+  labs(title = "Michigan Population by Peninsula",x="Peninsula" , y="Total Population" )
 
-```
+ggplot(data =  county_MI, aes(x = county_MI$peninsula,y = county_MI$Poverty)) +
+  geom_boxplot(colour="black",fill="light blue",outlier.colour = "red")+
+  labs(title = "Michigan Population by Peninsula",x="Peninsula" , y="Total Population" )
+
+library(reshape2)
+
+mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Hispanic','White','Black','Native','Asian'))
+ ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=log(value), color=variable)) 
+ 
+ 
+ 
+ mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Unemployment','Poverty'))
+ ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=value, color=variable)) 
+ 
+ 
+ 
+
+ 
+
+ ```
 
 ### Problem 5 - How do regions of the country compare?
 
@@ -176,6 +223,13 @@ distribution of MeanCommute time. Make sure your graph has a title and good axis
 labels.
 
 ```{r faceted_histo}
+ggplot(data=county_df, aes(county_df$TotalPop)) + 
+  geom_histogram(colour ="Red", fill ="light blue") + 
+  labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties") + 
+  facet_grid(. ~ Region)
+
+
+
 
 ```
 
@@ -185,7 +239,7 @@ Create a bar chart showing the number of counties by Region in the US. Make sure
 your graph has a title and good axis labels.
 
 ```{r bar_counties_by_region}
-
+ggplot(county_df,aes(x = county_df$Region)) + geom_bar() + labs(title = "Number of Counties By Region", x="Region" , y="Count")
 ```
 
 ### Problem 7 - Basic scatter plots
