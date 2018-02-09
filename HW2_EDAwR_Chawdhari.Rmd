@@ -118,15 +118,32 @@ income for the entire US.
 Write a short paragraph describing the distribution of median incomes.
 
 ```{r}
-ggplot(data=county_df, aes(county_df$Income)) + geom_histogram()
+#Histogram
+ggplot(data=county_df, aes(county_df$Income)) + 
+  geom_histogram(fill="Steel Blue" ,color="Black")+
+  labs(title="Histogram for Median Income for US" , x="Income")
 
-ggplot(data = county_df) + geom_histogram(mapping = aes(x = county_df$Income) ,binwidth = 1000)
-ggplot(data = county_df) + geom_boxplot(mapping = aes(x = "Mean Income", y = county_df$Income ))
 
 
-ggplot(data = county_df) +   geom_density(mapping = aes(x = county_df$Income))
+#BoxPlot
+ggplot(data = county_df) +
+  geom_boxplot(fill="Steel Blue",mapping = aes(x = "US", y = county_df$Income ))+
+  labs(title="Boxplot for Median Income for US" , x="",y="Income")+
+  theme_light()
+        
 
-ggplot(data=county_df, aes(y = county_df$Income,x = "count")) + geom_violin()
+#Denisity Plot
+ggplot(data = county_df) +   
+  geom_density( mapping = aes(x = county_df$Income))+
+  labs(title="Density for Median Income for US" , x="Income")
+
+
+
+#Violin Plot
+ggplot(data=county_df, aes(y = county_df$Income,x = "count")) + 
+  geom_violin(fill="Light Blue") +
+    labs(title="Violin Chart for Median Income for US" , x="Income")
+
 
 
 ```
@@ -207,10 +224,6 @@ mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Hispanic','White
  mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Unemployment','Poverty'))
  ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=value, color=variable)) 
  
- 
- 
-
- 
 
  ```
 
@@ -239,7 +252,11 @@ Create a bar chart showing the number of counties by Region in the US. Make sure
 your graph has a title and good axis labels.
 
 ```{r bar_counties_by_region}
-ggplot(county_df,aes(x = county_df$Region)) + geom_bar() + labs(title = "Number of Counties By Region", x="Region" , y="Count")
+ggplot(county_df,aes(x = county_df$Region)) + 
+  geom_bar(fill="steel blue") + 
+  labs(title = "Number of Counties By Region", x="Region" , y="Number of Counties") +
+  theme_minimal()
+
 ```
 
 ### Problem 7 - Basic scatter plots
@@ -248,6 +265,14 @@ Create a scatter plot using the Michigan only data frame comparing
 Income and MeanCommute.
 
 ```{r xy_inc_commute}
+ggplot(county_MI,aes( y =county_MI$Income,x=county_MI$MeanCommute)) + 
+  geom_point() + 
+  labs(title = "Scatter plot for Mean Commute and Income", x="Income" , y="MeanCommute") +
+  theme_minimal()+
+  geom_smooth()
+
+
+
 
 ```
 
@@ -255,6 +280,11 @@ Create a modified version of the above scatter plot in which the point color
 is mapped to peninsula.
 
 ```{r xy_inc_commute_peninsula}
+
+ggplot(county_MI,aes(color=county_MI$peninsula,y = county_MI$Income,x= county_MI$MeanCommute)) + 
+  geom_point() + 
+  labs(title = "Number of Counties By Region", x="Income" , y="MeanCommute") +
+  theme_minimal()
 
 ```
 
@@ -266,6 +296,19 @@ peninsulas?
 
 ```{r xy_faceted_peninsula}
 
+ggplot(county_MI,aes(x=  log10(county_MI$Women) ,y =log10(county_MI$Men) )) + 
+  geom_point() + 
+  labs(title = "Number of Counties By Region", x="Women" , y="Men") +
+  
+    facet_grid(~ county_MI$peninsula)
+
+ggplot(county_MI,aes(x=  county_MI$Employed ,y =log10(county_MI$Unemployment) )) + 
+  geom_point() + 
+  labs(title = "Number of Counties By Region", x="Women" , y="Men") +
+  
+    facet_grid(~ county_MI$peninsula)
+
+
 ```
 
 
@@ -274,6 +317,20 @@ Now use the full US data frame.
 Create a scatter plot of TotalPop by Income.
 
 ```{r xy_pop_inc}
+ggplot(county_df,aes( y = log10(county_df$TotalPop),x= log10(county_df$Income) )) + 
+  geom_point() + 
+  labs(title = "Scatter plot for Total Population and Income", x="Income" , y="TotalPop") +
+  theme_minimal()+
+  geom_smooth()
+
+ggplot(county_df,aes( y = county_df$Income,x= county_df$TotalPop)) + 
+  geom_point() + 
+  labs(title = "Scatter plot for Mean Commute and Income", x="Income" , y="TotalPop") +
+  theme_minimal()+
+  geom_smooth()+
+    coord_trans(x = "log10", y = "log10")
+
+
 
 ```
 
