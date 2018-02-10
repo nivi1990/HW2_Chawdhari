@@ -79,6 +79,8 @@ Let's load a few libraries we'll need:
 ```{r}
 library(dplyr) 
 library(ggplot2)
+library(reshape2)
+
 ```
 
 
@@ -96,11 +98,16 @@ Check the structure of each data.frame and use the `summary` function to begin
 exploring the data. Are there any NA values? What 
 differences do you notice between the structure of the two data frames.
 
+There are no NA's in the countyMI data set while there are two NA's for the Income and IncomeError Field each.
+Structure wise there is an extra Peninsula column in the CountyMI data set,as a result Region Colum does not have any categories
+
 ```{r}
 str(county_df)
 str(county_MI)
 
 summary(county_df)
+summary(county_MI)
+
 ```
 
 The county_MI data frame contains data for Michigan only and includes an
@@ -130,6 +137,7 @@ ggplot(data = county_df) +
   geom_boxplot(fill="Steel Blue",mapping = aes(x = "US", y = county_df$Income ))+
   labs(title="Boxplot for Median Income for US" , x="",y="Income")+
   theme_light()
+
         
 
 #Denisity Plot
@@ -142,18 +150,26 @@ ggplot(data = county_df) +
 #Violin Plot
 ggplot(data=county_df, aes(y = county_df$Income,x = "count")) + 
   geom_violin(fill="Light Blue") +
-    labs(title="Violin Chart for Median Income for US" , x="Income")
+    labs(title="Violin Chart for Median Household Income for US" , x="Income")
 
+quantile(county_df$Income)
 
 
 ```
+  1. 50 % of the people have median household income from 37500 to 51000 aprx
+  2.There are many outliers on the higher side i.e people earning more than 75000
+  3.The histogram is skewed to the right.
+  4.There is an income inequality,this can be seen from the box plot,range for 4 th quartile  is way greater than combined range for     first 3 quartiles i.e 75% of the people had a household income that falls between a short range while household income for rest     25% is spread out,
 
 ### Problem 3 - Histogram of total population
 
 Create a histogram of total population for counties in the US.
 
 ```{r histo_totpop}
-ggplot(data=county_df, aes(county_df$TotalPop)) + geom_histogram()
+ggplot(data=county_df, aes(county_df$TotalPop)) + 
+  geom_histogram()+
+  labs(title="Population by Counties in US",x="Income",y="Count of Counties")
+
 
 ```
 
@@ -165,18 +181,31 @@ Repeat the histogram about but make the following style changes to the plot.
 * Change the colors of the bars to something other than the default black
 
 ```{r histo_stylechanges}
-ggplot(data=county_df, aes(county_df$TotalPop)) + geom_histogram(colour ="Red", fill ="light blue") + labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties")
+ggplot(data=county_df, aes(county_df$TotalPop)) + 
+  geom_histogram(colour ="Red", fill ="light blue") +
+  labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties")
 
 ```
 
 **Hacker Extra** - Also create a kernel density plot overlaid on a histogram of
 Income. 
+```{r histo_stylechanges}
+ ggplot(county_df,aes(x=log10(county_df$TotalPop) )) +
+  geom_histogram(aes(y=..density..),fill ="Steel Blue",color ="Gray")+
+geom_density(color="Red",fill="Red",alpha=0.2) +
+  labs(title="Density Overlaid Histogram for Total Population" ,x="Total Population")
+
+
+```
+
 
 Repeat the histogram but only for counties with less than 2.5 million people.
 
 ```{r histo_lt2.5m}
 
-ggplot(county_df[county_df$TotalPop < 2500000,],aes(x=TotalPop)) + geom_histogram(colour="red", fill ="Light Blue")+ labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties")
+ggplot(county_df[county_df$TotalPop < 2500000,],aes(x=TotalPop)) +
+  geom_histogram(colour="red", fill ="Light Blue")+
+  labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties")
  
 
 ```
@@ -189,11 +218,12 @@ your graph has a title and good axis labels.
 
 Do the peninsulas 
 differ with respect to distribution of median income over the counties?
+
 Yes ,the peninsulas do differe with respect to the median income.
 1.The range of income for lower peninsula is greater than that for upper peninsula
 2.Overal Income for Lower Peninsula is higher than that for Upper Peninsula
 3.There are a few extreme income values for lower peninusla while for Upper Peninsula there are no outliers.
-
+4.There is more income inequality in Lower Peninsula as compared to Upper Peninsula,The Income for Upper Peninsula seems to uniformly distributed as compared to LP.
 
 ```{r bp_inc_by_peninsula}
 ggplot(data =  county_MI, aes(x = county_MI$peninsula,y = county_MI$Income)) +
@@ -206,26 +236,44 @@ Create several more boxplots showing how the peninsulas compare with respect to
 some of the other variables. Summarize your findings in a few short paragraphs.
 
 ```{r more_boxplots}
+#Boxplot for Total Population
 ggplot(data =  county_MI, aes(x = county_MI$peninsula,y = log(county_MI$TotalPop))) +
   geom_boxplot(colour="black",fill="light blue",outlier.colour = "red")+
   labs(title = "Michigan Population by Peninsula",x="Peninsula" , y="Total Population" )
 
+#Boxplot for Poverty
 ggplot(data =  county_MI, aes(x = county_MI$peninsula,y = county_MI$Poverty)) +
   geom_boxplot(colour="black",fill="light blue",outlier.colour = "red")+
-  labs(title = "Michigan Population by Peninsula",x="Peninsula" , y="Total Population" )
+  labs(title = "Michigan Population by Peninsula",x="Peninsula" , y="Poverty" )
 
-library(reshape2)
+#Boxplot for Income
+ggplot(data =  county_MI, aes(x = county_MI$peninsula,y = county_MI$Income)) +
+  geom_boxplot(colour="black",fill="light blue",outlier.colour = "red")+
+  labs(title = "Michigan Population by Peninsula",x="Peninsula" , y="Income" )
 
+#Grouped plot for Population Race
 mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Hispanic','White','Black','Native','Asian'))
  ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=log(value), color=variable)) 
- 
  
  
  mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Unemployment','Poverty'))
  ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=value, color=variable)) 
  
+ #Grouped Plot for Means of Commute
+ mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Drive','Carpool','Transit','Walk','OtherTransp'))
+ ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=value, color=variable)) 
+ 
+ #Grouped by Type of Employment 
+ mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('Professional','Service','Office','Production'))
+ ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=value, color=variable)) 
+ 
+  #Grouped by Type of Employment 
+ mdata <- melt(data = county_MI, id = 'peninsula', measure = c ('PrivateWork','PublicWork','SelfEmployed','FamilyWork'))
+ ggplot(mdata) + geom_boxplot(aes(x=peninsula, y=value, color=variable)) 
 
- ```
+ 
+ 
+```
 
 ### Problem 5 - How do regions of the country compare?
 
@@ -238,15 +286,34 @@ labels.
 ```{r faceted_histo}
 ggplot(data=county_df, aes(county_df$TotalPop)) + 
   geom_histogram(colour ="Red", fill ="light blue") + 
-  labs(title="Distribution of population for US counties" ,x="Total Population",y="Number of counties") + 
+  labs(title="Distribution of population for US counties" ,x="TotalPop",y="Number of counties") + 
+  facet_grid(. ~ Region)
+
+ggplot(data=county_df, aes(county_df$Poverty)) + 
+  geom_histogram(colour ="Red", fill ="light blue") + 
+  labs(title="Distribution of population for US counties" ,x="Poverty",y="Number of counties") + 
+  facet_grid(. ~ Region)
+
+ggplot(data=county_df, aes(county_df$MeanCommute)) + 
+  geom_histogram(colour ="Red", fill ="light blue") + 
+  labs(title="Distribution of population for US counties" ,x="MeanCommute",y="Number of counties") + 
   facet_grid(. ~ Region)
 
 
+ggplot(data=county_df, aes(county_df$IncomePerCap)) + 
+  geom_histogram(colour ="Red", fill ="light blue") + 
+  labs(title="Distribution of population for US counties" ,x="IncomePerCap",y="Number of counties") + 
+  facet_grid(. ~ Region)
 
-
+ggplot(data=county_df, aes(county_df$Income)) + 
+  geom_histogram(colour ="Red", fill ="light blue") + 
+  labs(title="Distribution of population for US counties" ,x="IncomePerCap",y="Number of counties") + 
+  theme(axis.text.x = element_text(angle=90))+
+  facet_grid(. ~ Region)
 ```
 
 ### Problem 6 - Basic bar chart
+
 
 Create a bar chart showing the number of counties by Region in the US. Make sure
 your graph has a title and good axis labels.
@@ -302,9 +369,9 @@ ggplot(county_MI,aes(x=  log10(county_MI$Women) ,y =log10(county_MI$Men) )) +
   
     facet_grid(~ county_MI$peninsula)
 
-ggplot(county_MI,aes(x=  county_MI$Employed ,y =log10(county_MI$Unemployment) )) + 
+ggplot(county_MI,aes(x= log10(county_MI$Employed)  ,y =log10(county_MI$Poverty) )) + 
   geom_point() + 
-  labs(title = "Number of Counties By Region", x="Women" , y="Men") +
+  labs(title = "Number of Counties By Region", x="Employed" , y="Poverty") +
   
     facet_grid(~ county_MI$peninsula)
 
